@@ -1,0 +1,20 @@
+# Build artifacts
+/target
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Config (contains secrets) - example is generated on startup
+/config/
+
+# Logs
+/logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+Cargo.lock

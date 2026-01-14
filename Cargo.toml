@@ -1,0 +1,20 @@
+[package]
+name = "gitlab_hcloud"
+version = "0.1.0"
+edition = "2021"
+description = "Automatic Hetzner server provisioning for GitLab CI runners"
+authors = ["Maximilian Kutschka"]
+
+[dependencies]
+tokio = { version = "1.43", features = ["full"] }
+reqwest = { version = "0.13", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+toml = "0.9"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+chrono = { version = "0.4", features = ["serde"] }
+base64 = "0.22"
+thiserror = "2.0"
+anyhow = "1.0"

@@ -1,0 +1,5 @@
+services:
+  hcloud-starter:
+    build: .
+    volumes:
+      - ./config:/app/config
