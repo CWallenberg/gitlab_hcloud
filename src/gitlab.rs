@@ -125,7 +125,7 @@ impl GitLabClient {
 
         loop {
             let endpoint = format!(
-                "/projects?membership=true&simple=true&per_page={}&page={}",
+                "/projects?membership=true&simple=true&archived=false&starred=true&per_page={}&page={}",
                 per_page, page
             );
 
