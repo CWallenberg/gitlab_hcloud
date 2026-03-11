@@ -124,6 +124,7 @@ impl GitLabClient {
         let per_page = 100;
 
         loop {
+            /// Only check projects that are starred and not archived 
             let endpoint = format!(
                 "/projects?membership=true&simple=true&archived=false&starred=true&per_page={}&page={}",
                 per_page, page
