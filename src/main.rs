@@ -65,6 +65,9 @@ const CONFIG_EXAMPLE_CONTENT: &str = r#"# GitLab Runner Orchestrator - Example C
 url = "https://gitlab.example.com"
 # Personal Access Token with API access (read_api scope is sufficient)
 token = "glpat-xxxxxxxxxxxxxxxxxxxx"
+# Optional: only spin up a runner when a pending job has one of these tags.
+# Remove or leave empty to react to all pending jobs.
+# tag_filter = ["hetzner", "my-runner-tag"]
 
 [hetzner]
 # Hetzner Cloud API Token
@@ -291,20 +294,20 @@ async fn orchestration_tick(
     config: &Config,
     state: &mut OrchestratorState,
 ) -> Result<()> {
-    // Query GitLab for active pipelines
-    let active_pipelines = gitlab_client.find_active_pipelines().await?;
-    let has_active = !active_pipelines.is_empty();
+    // Query GitLab for active jobs (filtered by tag if configured)
+    let active_jobs = gitlab_client
+        .find_active_jobs(config.gitlab.tag_filter.as_deref())
+        .await?;
+    let has_active = !active_jobs.is_empty();
 
     if has_active {
-        // There are active pipelines - ensure server exists
+        // There are active jobs - ensure server exists
         if !state.has_runner() {
             // No server present - create one
-            let first_pipeline = &active_pipelines[0];
+            let first_job = &active_jobs[0];
             info!(
-                "Active pipeline found: {} (ID: {}) in {}",
-                first_pipeline.pipeline.status,
-                first_pipeline.pipeline.id,
-                first_pipeline.project.path_with_namespace
+                "Active job found: {} (ID: {}) in {}",
+                first_job.job.status, first_job.job.id, first_job.project.path_with_namespace
             );
 
             create_runner(
@@ -313,27 +316,27 @@ async fn orchestration_tick(
                 cloud_init,
                 config,
                 state,
-                &first_pipeline.project.path_with_namespace,
-                first_pipeline.pipeline.id,
+                &first_job.project.path_with_namespace,
+                first_job.job.id,
             )
             .await?;
         } else {
             // Server is already running
             if let Some(uptime) = state.runner_uptime() {
                 info!(
-                    "Server running ({}min), {} active pipeline(s)",
+                    "Server running ({}min), {} active job(s)",
                     uptime,
-                    active_pipelines.len()
+                    active_jobs.len()
                 );
             }
         }
     } else {
-        // No active pipelines
+        // No active jobs
         if state.has_runner() {
-            // Server is running, but no pipelines anymore - check if we should delete
+            // Server is running, but no jobs anymore - check if we should delete
             maybe_delete_runner(hetzner_client, csv_logger, config, state).await?;
         } else {
-            info!("No active pipelines, no server active - waiting...");
+            info!("No active jobs, no server active - waiting...");
         }
     }
 
