@@ -36,6 +36,9 @@ pub struct GitLabConfig {
     pub url: String,
     /// Personal Access Token for API authentication
     pub token: String,
+    /// Optional runner tag filter - only spin up a runner when a pending job has one of these tags.
+    /// If absent, all pending jobs trigger a runner (original behavior).
+    pub tag_filter: Option<Vec<String>>,
 }
 
 /// Hetzner Cloud configuration.
